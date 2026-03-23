@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Hash Demonstrator</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        h2 { margin-top: 0; color: #2c3e50; }
+        textarea {
+            width: 100%;
+            height: 120px;
+            padding: 15px;
+            font-size: 16px;
+            border: 2px solid #bdc3c7;
+            border-radius: 5px;
+            box-sizing: border-box;
+            resize: vertical;
+            margin-bottom: 20px;
+            font-family: inherit;
+        }
+        textarea:focus {
+            border-color: #3498db;
+            outline: none;
+        }
+        .output-box {
+            background: #2c3e50;
+            color: #2ecc71;
+            padding: 20px;
+            border-radius: 5px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 18px;
+            word-wrap: break-word;
+            min-height: 25px;
+        }
+        .stats {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #7f8c8d;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Real-Time SHA-256 Hash Engine</h2>
+    <p>Type anything below. Watch how the 256-bit hash completely changes if you alter even a single letter.</p>
+    
+    <textarea id="inputBox" placeholder="Start typing your message here..."></textarea>
+    
+    <strong>Fixed-Size Output (Digest):</strong>
+    <div class="output-box" id="hashOutput">Waiting for input...</div>
+    <div class="stats" id="statsOutput">Length: 0 characters</div>
+</div>
+
+<script>
+    const inputBox = document.getElementById('inputBox');
+    const hashOutput = document.getElementById('hashOutput');
+    const statsOutput = document.getElementById('statsOutput');
+
+    // Function to generate the SHA-256 hash using the browser's built-in Crypto API
+    async function generateHash(text) {
+        const msgBuffer = new TextEncoder().encode(text);
+        const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        return hashHex;
+    }
+
+    // Listen for every keystroke
+    inputBox.addEventListener('input', async () => {
+        const text = inputBox.value;
+        
+        if (text === '') {
+            hashOutput.textContent = 'Waiting for input...';
+            statsOutput.textContent = 'Length: 0 characters';
+            return;
+        }
+
+        const hash = await generateHash(text);
+        hashOutput.textContent = hash;
+        statsOutput.textContent = `Length: ${hash.length} characters (256 bits)`;
+    });
+</script>
+
+</body>
+</html>
